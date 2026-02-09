@@ -30,17 +30,6 @@ const JobForm = ({ onSubmit, loading = false, initialValue = null, onCancelEdit 
     setForm((prev) => ({ ...prev, requiredSkills: nextSkills }));
   };
 
-  const addSkill = () => {
-    setForm((prev) => ({ ...prev, requiredSkills: [...prev.requiredSkills, createEmptySkill()] }));
-  };
-
-  const removeSkill = (index) => {
-    setForm((prev) => ({
-      ...prev,
-      requiredSkills: prev.requiredSkills.filter((_, i) => i !== index)
-    }));
-  };
-
   const handleSubmit = (event) => {
     event.preventDefault();
 
@@ -59,81 +48,123 @@ const JobForm = ({ onSubmit, loading = false, initialValue = null, onCancelEdit 
   };
 
   return (
-    <form className="card" onSubmit={handleSubmit}>
-      <h2>{isEditMode ? 'Edit Job' : 'Create Job'}</h2>
-      <input
-        type="text"
-        placeholder="Job title"
-        value={form.title}
-        onChange={(e) => handleFieldChange('title', e.target.value)}
-        required
-      />
-      <input
-        type="text"
-        placeholder="Company"
-        value={form.company}
-        onChange={(e) => handleFieldChange('company', e.target.value)}
-        required
-      />
-      <textarea
-        placeholder="Description"
-        value={form.description}
-        onChange={(e) => handleFieldChange('description', e.target.value)}
-        required
-      />
-      <input
-        type="text"
-        placeholder="Location"
-        value={form.location}
-        onChange={(e) => handleFieldChange('location', e.target.value)}
-        required
-      />
-      <input
-        type="text"
-        placeholder="Role category"
-        value={form.roleCategory}
-        onChange={(e) => handleFieldChange('roleCategory', e.target.value)}
-        required
-      />
+    <div className="card shadow-sm border-0 mb-4">
+      <div className="card-body p-3">
+        <h5 className="card-title mb-3">{isEditMode ? 'Edit Job' : 'Create Job'}</h5>
+        <form onSubmit={handleSubmit}>
+          <div className="row g-3">
+            <div className="col-md-6">
+              <label className="form-label">Job Title</label>
+              <input
+                type="text"
+                className="form-control"
+                value={form.title}
+                onChange={(e) => handleFieldChange('title', e.target.value)}
+                required
+              />
+            </div>
+            <div className="col-md-6">
+              <label className="form-label">Company</label>
+              <input
+                type="text"
+                className="form-control"
+                value={form.company}
+                onChange={(e) => handleFieldChange('company', e.target.value)}
+                required
+              />
+            </div>
+            <div className="col-md-12">
+              <label className="form-label">Description</label>
+              <textarea
+                className="form-control"
+                rows="3"
+                value={form.description}
+                onChange={(e) => handleFieldChange('description', e.target.value)}
+                required
+              />
+            </div>
+            <div className="col-md-6">
+              <label className="form-label">Location</label>
+              <input
+                type="text"
+                className="form-control"
+                value={form.location}
+                onChange={(e) => handleFieldChange('location', e.target.value)}
+                required
+              />
+            </div>
+            <div className="col-md-6">
+              <label className="form-label">Role Category</label>
+              <input
+                type="text"
+                className="form-control"
+                value={form.roleCategory}
+                onChange={(e) => handleFieldChange('roleCategory', e.target.value)}
+                required
+              />
+            </div>
+          </div>
 
-      <h3>Required Skills</h3>
-      {form.requiredSkills.map((skill, index) => (
-        <div className="row" key={`${index}-${skill.name}`}>
-          <input
-            type="text"
-            placeholder="Skill name"
-            value={skill.name}
-            onChange={(e) => handleSkillChange(index, 'name', e.target.value)}
-            required
-          />
-          <input
-            type="number"
-            min="1"
-            max="10"
-            value={skill.weight}
-            onChange={(e) => handleSkillChange(index, 'weight', e.target.value)}
-            required
-          />
-          <button type="button" onClick={() => removeSkill(index)} disabled={form.requiredSkills.length === 1}>
-            Remove
-          </button>
-        </div>
-      ))}
+          <hr />
+          <h6 className="mb-3">Required Skills</h6>
 
-      <div className="actions">
-        <button type="button" onClick={addSkill}>
-          Add Required Skill
-        </button>
-        {isEditMode && (
-          <button type="button" onClick={onCancelEdit}>
-            Cancel Edit
-          </button>
-        )}
-        <button type="submit" disabled={loading}>
-          {loading ? 'Saving...' : isEditMode ? 'Update Job' : 'Create Job'}
-        </button>
+          {form.requiredSkills.map((skill, index) => (
+            <div className="row g-2 mb-2" key={`${index}-${skill.name}`}>
+              <div className="col-md-7">
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Skill name"
+                  value={skill.name}
+                  onChange={(e) => handleSkillChange(index, 'name', e.target.value)}
+                  required
+                />
+              </div>
+              <div className="col-md-3">
+                <input
+                  type="number"
+                  min="1"
+                  max="10"
+                  className="form-control"
+                  placeholder="Weight"
+                  value={skill.weight}
+                  onChange={(e) => handleSkillChange(index, 'weight', e.target.value)}
+                  required
+                />
+              </div>
+              <div className="col-md-2 d-grid">
+                <button
+                  type="button"
+                  className="btn btn-outline-danger"
+                  onClick={() => setForm((prev) => ({ ...prev, requiredSkills: prev.requiredSkills.filter((_, i) => i !== index) }))}
+                  disabled={form.requiredSkills.length === 1}
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
+          ))}
+
+          <div className="d-flex flex-wrap gap-2 mt-3">
+            <button
+              type="button"
+              className="btn btn-outline-primary"
+              onClick={() => setForm((prev) => ({ ...prev, requiredSkills: [...prev.requiredSkills, createEmptySkill()] }))}
+            >
+              Add Required Skill
+            </button>
+            {isEditMode && (
+              <button type="button" className="btn btn-outline-secondary" onClick={onCancelEdit}>
+                Cancel Edit
+              </button>
+            )}
+            <button type="submit" className="btn btn-primary" disabled={loading}>
+              {loading ? 'Saving...' : isEditMode ? 'Update Job' : 'Create Job'}
+            </button>
+          </div>
+        </form>
       </div>
-    </form>
+    </div>
   );
 };
 

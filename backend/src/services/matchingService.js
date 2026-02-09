@@ -3,6 +3,11 @@ const Job = require('../models/Job');
 const AppError = require('../utils/appError');
 
 const normalizeSkill = (skillName) => skillName.trim().toLowerCase();
+const hasMeaningfulFilter = (value) => {
+  if (typeof value !== 'string') return false;
+  const normalized = value.trim().toLowerCase();
+  return normalized !== '' && normalized !== 'undefined' && normalized !== 'null';
+};
 
 const calculateWeightedMatch = (studentSkills = [], jobSkills = []) => {
   // Build a normalized lookup map once for O(1) skill checks per required job skill.
@@ -45,18 +50,19 @@ const getStudentMatches = async (studentId, filters) => {
   }
 
   const query = { isActive: true };
-  if (filters.location) {
-    query.location = { $regex: filters.location, $options: 'i' };
+  if (hasMeaningfulFilter(filters.location)) {
+    query.location = { $regex: filters.location.trim(), $options: 'i' };
   }
-  if (filters.role) {
-    query.roleCategory = { $regex: filters.role, $options: 'i' };
+  if (hasMeaningfulFilter(filters.role)) {
+    query.roleCategory = { $regex: filters.role.trim(), $options: 'i' };
   }
 
   const jobs = await Job.find(query).sort({ createdAt: -1 }).lean();
 
   const threshold = Number(filters.threshold || 0);
-  const requiredSkillFilter = filters.requiredSkill
+  const requiredSkillFilter = hasMeaningfulFilter(filters.requiredSkill)
     ? filters.requiredSkill
+        .trim()
         .split(',')
         .map((skill) => normalizeSkill(skill))
         .filter(Boolean)

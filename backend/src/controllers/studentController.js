@@ -38,7 +38,21 @@ const getMatchedJobs = asyncHandler(async (req, res) => {
   });
 });
 
+const getProfile = asyncHandler(async (req, res) => {
+  const student = await User.findById(req.user._id).select('-password').lean();
+
+  if (!student) {
+    throw new AppError('Student not found.', 404);
+  }
+
+  res.status(200).json({
+    success: true,
+    data: student
+  });
+});
+
 module.exports = {
   upsertSkills,
-  getMatchedJobs
+  getMatchedJobs,
+  getProfile
 };

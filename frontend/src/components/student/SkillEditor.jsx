@@ -1,22 +1,14 @@
 import { useState } from 'react';
 
-const emptySkill = { name: '', proficiency: 3 };
+const createEmptySkill = () => ({ name: '', proficiency: 3 });
 
 const SkillEditor = ({ onSave, loading = false }) => {
-  const [skills, setSkills] = useState([emptySkill]);
+  const [skills, setSkills] = useState([createEmptySkill()]);
 
   const handleSkillChange = (index, field, value) => {
     const next = [...skills];
     next[index] = { ...next[index], [field]: value };
     setSkills(next);
-  };
-
-  const addSkillRow = () => {
-    setSkills((prev) => [...prev, emptySkill]);
-  };
-
-  const removeSkillRow = (index) => {
-    setSkills((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = (event) => {
@@ -33,41 +25,64 @@ const SkillEditor = ({ onSave, loading = false }) => {
   };
 
   return (
-    <form className="card" onSubmit={handleSubmit}>
-      <h2>Update Skills</h2>
-      {skills.map((skill, index) => (
-        <div className="row" key={`${index}-${skill.name}`}>
-          <input
-            type="text"
-            placeholder="Skill name"
-            value={skill.name}
-            onChange={(e) => handleSkillChange(index, 'name', e.target.value)}
-            required
-          />
-          <select
-            value={skill.proficiency}
-            onChange={(e) => handleSkillChange(index, 'proficiency', e.target.value)}
-          >
-            <option value={1}>1</option>
-            <option value={2}>2</option>
-            <option value={3}>3</option>
-            <option value={4}>4</option>
-            <option value={5}>5</option>
-          </select>
-          <button type="button" onClick={() => removeSkillRow(index)} disabled={skills.length === 1}>
-            Remove
-          </button>
-        </div>
-      ))}
-      <div className="actions">
-        <button type="button" onClick={addSkillRow}>
-          Add Skill
-        </button>
-        <button type="submit" disabled={loading}>
-          {loading ? 'Saving...' : 'Save Skills'}
-        </button>
+    <div className="card shadow-sm border-0 mb-4">
+      <div className="card-body p-3">
+        <h5 className="card-title mb-3">Update Skills</h5>
+        <form onSubmit={handleSubmit}>
+          {skills.map((skill, index) => (
+            <div className="row g-2 mb-2 align-items-end" key={`${index}-${skill.name}`}>
+              <div className="col-md-7">
+                <label className="form-label">Skill Name</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={skill.name}
+                  onChange={(e) => handleSkillChange(index, 'name', e.target.value)}
+                  required
+                />
+              </div>
+              <div className="col-md-3">
+                <label className="form-label">Proficiency</label>
+                <select
+                  className="form-select"
+                  value={skill.proficiency}
+                  onChange={(e) => handleSkillChange(index, 'proficiency', e.target.value)}
+                >
+                  <option value={1}>1</option>
+                  <option value={2}>2</option>
+                  <option value={3}>3</option>
+                  <option value={4}>4</option>
+                  <option value={5}>5</option>
+                </select>
+              </div>
+              <div className="col-md-2 d-grid">
+                <button
+                  type="button"
+                  className="btn btn-outline-danger"
+                  onClick={() => setSkills((prev) => prev.filter((_, i) => i !== index))}
+                  disabled={skills.length === 1}
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
+          ))}
+
+          <div className="d-flex gap-2 mt-3">
+            <button
+              type="button"
+              className="btn btn-outline-primary"
+              onClick={() => setSkills((prev) => [...prev, createEmptySkill()])}
+            >
+              Add Skill
+            </button>
+            <button type="submit" className="btn btn-primary" disabled={loading}>
+              {loading ? 'Saving...' : 'Save Skills'}
+            </button>
+          </div>
+        </form>
       </div>
-    </form>
+    </div>
   );
 };
 

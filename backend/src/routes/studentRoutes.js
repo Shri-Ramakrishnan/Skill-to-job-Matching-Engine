@@ -10,6 +10,7 @@ const router = express.Router();
 
 router.use(authMiddleware, roleMiddleware('student'));
 
+router.get('/profile', studentController.getProfile);
 router.put('/skills', validate(updateStudentSkillsSchema), studentController.upsertSkills);
 router.get('/matches', studentController.getMatchedJobs);
 

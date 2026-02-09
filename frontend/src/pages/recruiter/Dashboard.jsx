@@ -9,22 +9,28 @@ import {
   getRecruiterJobsApi,
   updateJobApi
 } from '../../api/recruiterApi';
+import { extractErrorMessage } from '../../utils/apiError';
 
 const Dashboard = () => {
   const [jobs, setJobs] = useState([]);
   const [editingJob, setEditingJob] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [savingJob, setSavingJob] = useState(false);
+  const [jobsLoading, setJobsLoading] = useState(true);
+  const [deletingJobId, setDeletingJobId] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
   const loadJobs = async () => {
     setError('');
+    setJobsLoading(true);
 
     try {
       const response = await getRecruiterJobsApi();
       setJobs(response.data.jobs || []);
     } catch (apiError) {
-      setError(apiError.response?.data?.message || 'Unable to load jobs.');
+      setError(extractErrorMessage(apiError, 'Unable to load jobs.'));
+    } finally {
+      setJobsLoading(false);
     }
   };
 
@@ -35,7 +41,7 @@ const Dashboard = () => {
   const handleSubmitJob = async (payload) => {
     setError('');
     setMessage('');
-    setLoading(true);
+    setSavingJob(true);
 
     try {
       if (editingJob?._id) {
@@ -49,22 +55,25 @@ const Dashboard = () => {
       setEditingJob(null);
       await loadJobs();
     } catch (apiError) {
-      setError(apiError.response?.data?.message || 'Unable to save job.');
+      setError(extractErrorMessage(apiError, 'Unable to save job.'));
     } finally {
-      setLoading(false);
+      setSavingJob(false);
     }
   };
 
   const handleDelete = async (jobId) => {
     setError('');
     setMessage('');
+    setDeletingJobId(jobId);
 
     try {
       await deleteJobApi(jobId);
       setMessage('Job deleted successfully.');
       await loadJobs();
     } catch (apiError) {
-      setError(apiError.response?.data?.message || 'Unable to delete job.');
+      setError(extractErrorMessage(apiError, 'Unable to delete job.'));
+    } finally {
+      setDeletingJobId('');
     }
   };
 
@@ -75,12 +84,23 @@ const Dashboard = () => {
 
       <JobForm
         onSubmit={handleSubmitJob}
-        loading={loading}
+        loading={savingJob}
         initialValue={editingJob}
         onCancelEdit={() => setEditingJob(null)}
       />
 
-      <RecruiterJobList jobs={jobs} onEdit={setEditingJob} onDelete={handleDelete} />
+      {jobsLoading ? (
+        <div className="card shadow-sm border-0 mb-4">
+          <div className="card-body">Loading posted jobs...</div>
+        </div>
+      ) : (
+        <RecruiterJobList
+          jobs={jobs}
+          onEdit={setEditingJob}
+          onDelete={handleDelete}
+          deletingJobId={deletingJobId}
+        />
+      )}
     </DashboardLayout>
   );
 };
