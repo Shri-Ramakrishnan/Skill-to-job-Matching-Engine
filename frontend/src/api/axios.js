@@ -1,11 +1,27 @@
 import axios from 'axios';
 
+// Decide base URL safely
+const baseURL =
+  import.meta.env.MODE === 'development'
+    ? 'http://localhost:5000/api'
+    : import.meta.env.VITE_API_BASE_URL;
+
+if (!baseURL) {
+  throw new Error('VITE_API_BASE_URL is not defined');
+}
+
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'
+  baseURL,
+  timeout: 15000, // prevents hanging requests (Render cold starts)
 });
 
-const AUTH_FAILURE_MESSAGES = new Set(['invalid token', 'token expired', 'not authorized']);
+const AUTH_FAILURE_MESSAGES = new Set([
+  'invalid token',
+  'token expired',
+  'not authorized',
+]);
 
+// Attach JWT to every request
 axiosInstance.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
 
@@ -17,6 +33,7 @@ axiosInstance.interceptors.request.use((config) => {
   return config;
 });
 
+// Handle auth failures globally
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
